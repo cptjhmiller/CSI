@@ -174,6 +174,7 @@ appinit_auto_upgrade()
     echo -n "Checking for new version: "
     if [ ! -d "$APPINIT_PROFILE" ]; then
         mkdir -p "$APPINIT_PROFILE"
+        chown nmt.nmt "$APPINIT_PROFILE"
     fi
     rm "$APPINIT_PROFILE/version_online" 2>/dev/null
     wget -T 3 -t 1 -q -O "$APPINIT_PROFILE/version_online" $APPINIT_VERSION_URL 2>/dev/null
@@ -183,6 +184,7 @@ appinit_auto_upgrade()
             wget -q -O "$APPINIT_PROFILE/$APPINIT_FILENAME" $APPINIT_UPGRADE_URL
             echo "Upgraded"
             chmod a+x "$APPINIT_PROFILE/$APPINIT_FILENAME"
+            chown nmt.nmt "$APPINIT_PROFILE/$APPINIT_FILENAME"
             eval "$APPINIT_PROFILE/$APPINIT_FILENAME \"$1\" \"$2\""
             exit 0
         else
@@ -248,6 +250,7 @@ appinit_profile_create()
     
         if [ ! -d "$APPINIT_PROFILE" ]; then
             mkdir -p "$APPINIT_PROFILE"
+            chown nmt.nmt "$APPINIT_PROFILE"
         fi
 
         #cleanup profile folder
@@ -257,6 +260,7 @@ appinit_profile_create()
             cp "$0" "$APPINIT_PROFILE/$APPINIT_FILENAME"
             rm -Rf "$0"
             chmod a+x "$APPINIT_PROFILE/$APPINIT_FILENAME"
+            chown nmt.nmt "$APPINIT_PROFILE/$APPINIT_FILENAME"
         fi
         
         mkdir -p "$APPINIT_PROFILE/websites"
