@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 ##############################################################
 #
 #   Generic 3rd party application initializer
@@ -110,7 +110,13 @@
 #
 #   Version 1.15
 #       jhmiller: Added improved device detection
-#					
+#
+#   Version 1.16
+#           JrCs: Added new fix_permissions option. If the fix_permissions
+#                 option is set in the file 'appinfo.json' with the value 'no'
+#                 then no permissions changes will be made when the application
+#                 start.
+#
 #
 #-------------------------------------------------------------
 #   Legal: published under GPL v3
@@ -438,6 +444,7 @@ app_appinfo_parse()
     path="${1%/*}/"
     crontab=""
     setup_script=""
+    fix_permissions="yes" # Fix permissions by default
     gayaui_path=""
     webui_path=""
     
@@ -467,6 +474,9 @@ app_appinfo_parse()
             ;;
             setup_script)
             setup_script="`parameter_value "$LINE"`"
+            ;;
+            fix_permissions)
+            fix_permissions="`parameter_value "$LINE"`"
             ;;
             gayaui_path)
             gayaui_path="`parameter_value "$LINE"`"
@@ -737,7 +747,7 @@ application_start()
     echo -n "Starting $name: "
     app_startstate_isstarted
     if [ "$?" == "0" ]; then
-        app_fixpermissions "$path"
+        [[ $(tolower $fix_permissions) == y* ]] && app_fixpermissions "$path"
         app_autoinstall
         app_websites_add
         app_crontab_add
