@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 ##############################################################
 #
 #   Generic 3rd party application initializer
