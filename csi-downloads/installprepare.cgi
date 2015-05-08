@@ -22,15 +22,17 @@ if [ -e "/nmt/apps" ]; then
 	STARTSCRIP_LOCATION="$NMTAPPS_LOCATION/etc/init_nmt"
 	configid=$(genxenv2 l /tmp/lrro.xenv 2>/dev/null | grep -e " lrro.configid" | sed -e's/.*lrro.configid\s*//' | sed 's/\ //g'| sed 's/0x//g')
 	configid=$configid[@]:0:4
-	if [ "$configid" = "8911" ]; then
-		echo "Popcorn Hour A-400/410"
+	if [ "$configid" = "8003" ]; then
+		echo "Popcorn Hour VTEN"
+	elif [ "$configid" = "8911" ]; then
+		echo "Popcorn Hour A400/410"
 	elif [ "$configid" = "8647" ]; then
-		echo "Popcorn Hour A/C-300"
+		echo "Popcorn Hour A/C300"
 	else
-		echo "Popcorn Hour A/C-200"
+		echo "Popcorn Hour A/C200"
 	fi
 else
-	echo "Popcorn Hour A-1xx/B-110"
+	echo "Popcorn Hour A1xx/B110"
 	NMTAPPS_LOCATION="/mnt/syb8634"
 	STARTSCRIP_LOCATION="$NMTAPPS_LOCATION/etc/ftpserver.sh"
 fi
