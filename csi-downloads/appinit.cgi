@@ -117,6 +117,9 @@
 #                 then no permissions changes will be made when the application
 #                 start.
 #
+#   Version 1.17
+#       jhmiller: Added VTEN support.
+#
 #
 #-------------------------------------------------------------
 #   Legal: published under GPL v3
@@ -135,7 +138,7 @@ APPS_MINIMAL_APPINFO_VERSION="1"
 APPINIT_NAME="Application Initializer"
 APPINIT_FILENAME="appinit.cgi"
 APPINIT_PROFILE="$APPS_FOLDER/AppInit"
-APPINIT_VERSION="1.16"
+APPINIT_VERSION="1.17"
 APPINIT_VERSION_URL="http://54.75.246.28/~csi/csi-downloads/appinit_version"
 APPINIT_UPGRADE_URL="http://54.75.246.28/~csi/csi-downloads/appinit.cgi"
 APPINIT_AUTOSTART_STATE="/tmp/appinit_state"
@@ -152,15 +155,17 @@ if [ -e "/nmt/apps" ]; then
 	STARTSCRIP_LOCATION="$NMTAPPS_LOCATION/etc/init_nmt"
 	configid=$(genxenv2 l /tmp/lrro.xenv 2>/dev/null | grep -e " lrro.configid" | sed -e's/.*lrro.configid\s*//' | sed 's/\ //g'| sed 's/0x//g')
 	configid=$configid[@]:0:4
-	if [ "$configid" = "8911" ]; then
-		echo "Popcorn Hour A-400"
+	if [ "$configid" = "8003" ]; then
+		echo "Popcorn Hour VTEN"
+	elif [ "$configid" = "8911" ]; then
+		echo "Popcorn Hour A400"
 	elif [ "$configid" = "8647" ]; then
-		echo "Popcorn Hour A/C-300"
+		echo "Popcorn Hour A/C300"
 	else
-		echo "Popcorn Hour A/C-200"
+		echo "Popcorn Hour A/C200"
 	fi
 else
-	echo "Popcorn Hour A-1xx/B-110"
+	echo "Popcorn Hour A1xx/B110"
 	NMTAPPS_LOCATION="/mnt/syb8634"
 	STARTSCRIP_LOCATION="$NMTAPPS_LOCATION/etc/ftpserver.sh"
 fi
@@ -1044,3 +1049,4 @@ fi
 echo
 echo -e "\x04"
 echo "</html>"
+
