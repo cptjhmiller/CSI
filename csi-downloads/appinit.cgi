@@ -308,6 +308,12 @@ appinit_profile_cronupdate()
     crontab -l > "$CRONTAB_LOCATION" 2>/dev/null
 }
 
+appinit_fix_init_nmt()
+{
+	# Fix invalid tests
+	sed -i -e 's!test -z $CHECKMODE!test -z "$CHECKMODE"!g' "$STARTSCRIP_LOCATION"
+}
+
 appinit_webserver_enable()
 {
     rm -f "$APPINIT_WEBSERVER_DISABLED"
@@ -843,7 +849,8 @@ appinit_prepare()
     appinit_auto_upgrade "$1" "$2"
     appinit_profile_create
     appinit_profile_cronupdate
-    
+    appinit_fix_init_nmt
+
     if [ -f "$APPINIT_WEBSERVER_DISABLED" ]; then
         appinit_webserver_disable
     else
