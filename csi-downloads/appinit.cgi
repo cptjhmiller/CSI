@@ -357,9 +357,8 @@ appinit_webserver_disable()
 
 app_crontab_remove()
 {
-    if [ -n "`cat "$CRONTAB_LOCATION" | grep "#APPINIT_${name}#"`" ]; then
-        TEMP="`cat "$CRONTAB_LOCATION" | grep -v "#APPINIT_${1}#" 2>/dev/null`"
-        echo "$TEMP" > "$CRONTAB_LOCATION"
+    if grep -q "#APPINIT_${name}#" "$CRONTAB_LOCATION"; then
+        sed -i "\!#APPINIT_${name}!d" "$CRONTAB_LOCATION"
         CRONTAB_RELOAD="1"
     fi
 }
@@ -367,11 +366,9 @@ app_crontab_remove()
 
 app_crontab_add()
 {
-    if [ -n "$crontab" ] && [ -z "`cat "$CRONTAB_LOCATION" | grep "#APPINIT_${name}#"`" ]; then
-        TEMP="`cat "$CRONTAB_LOCATION"`"
-        TEMP="`string_replace "$TEMP" "#bt" "$crontab #APPINIT_${name}#
-#bt"`"
-        echo "$TEMP" > "$CRONTAB_LOCATION"
+    if test -n "$crontab" && ! grep -q "#APPINIT_${name}#" "$CRONTAB_LOCATION"; then
+        sed -i "\!#APPINIT_${name}!d" "$CRONTAB_LOCATION"
+        echo "$crontab #APPINIT_${name}#" >> "$CRONTAB_LOCATION"
         CRONTAB_RELOAD="1"
     fi
 }
