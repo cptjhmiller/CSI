@@ -102,8 +102,8 @@
 #       Ger Teunis: Set a fast timeout on version check, including 1 try instead of 20
 #                   Always copy appinit to Profile, this will allow appinit upgrades
 #                    via CSI when NMT has no correctly working internet connection.
-#					Check if version length is 15 or less character
-#					add .no_all.nmj to Apps folder so it will not be indexed
+#                   Check if version length is 15 or less character
+#                   add .no_all.nmj to Apps folder so it will not be indexed
 #
 #   Version 1.14
 #       jhmiller: Added support for SD Card and improved device detection
@@ -120,6 +120,9 @@
 #   Version 1.17
 #       jhmiller: Added VTEN support.
 #
+#   Version 1.18
+#           JrCs: Update functions to "update" init_mnt script and crontab file.
+#                 Fix invalid tests in init_nmt script.
 #
 #-------------------------------------------------------------
 #   Legal: published under GPL v3
@@ -138,7 +141,7 @@ APPS_MINIMAL_APPINFO_VERSION="1"
 APPINIT_NAME="Application Initializer"
 APPINIT_FILENAME="appinit.cgi"
 APPINIT_PROFILE="$APPS_FOLDER/AppInit"
-APPINIT_VERSION="1.17"
+APPINIT_VERSION="1.18"
 APPINIT_VERSION_URL="http://54.75.246.28/~csi/csi-downloads/appinit_version"
 APPINIT_UPGRADE_URL="http://54.75.246.28/~csi/csi-downloads/appinit.cgi"
 APPINIT_AUTOSTART_STATE="/tmp/appinit_state"
