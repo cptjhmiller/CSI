@@ -226,24 +226,18 @@ appinit_autostart_remove()
 
 appinit_bootstart_add()
 {
-    if [ -z "`cat "$STARTSCRIP_LOCATION" | grep "$APPINIT_FILENAME"`" ]; then
+    if ! grep -q "$APPINIT_PROFILE/$APPINIT_FILENAME" "$STARTSCRIP_LOCATION"; then
         echo -n "Configuring system to start all applications on boot: "
-        TEMP="`cat "$STARTSCRIP_LOCATION"`"
-        
-        TEMP="`string_replace "$TEMP" "case \\\"\\$1\\\" in" "$APPINIT_PROFILE/$APPINIT_FILENAME \\\"\\$1\\\"
-case \\\"\\$1\\\" in"`"
-        
-        echo "$TEMP" > "$STARTSCRIP_LOCATION"
+        sed -i "\!^case .*in!i $APPINIT_PROFILE/$APPINIT_FILENAME \"\$1\"" "$STARTSCRIP_LOCATION"
         echo "Done"
     fi
 }
 
 appinit_bootstart_remove()
 {
-    if [ -n "`cat "$STARTSCRIP_LOCATION" | grep "$APPINIT_FILENAME"`" ]; then
+    if grep -q "$APPINIT_PROFILE/$APPINIT_FILENAME" "$STARTSCRIP_LOCATION"; then
         echo -n "Configuring system not to start all applications on boot: "
-        TEMP="`cat "$STARTSCRIP_LOCATION" | grep -v "$APPINIT_FILENAME"`"
-        echo "$TEMP" > "$STARTSCRIP_LOCATION"
+        sed -i "\!^$APPINIT_PROFILE/$APPINIT_FILENAME!d" "$STARTSCRIP_LOCATION"
         echo "Done"
     fi
 }
