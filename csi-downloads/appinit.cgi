@@ -102,8 +102,8 @@
 #       Ger Teunis: Set a fast timeout on version check, including 1 try instead of 20
 #                   Always copy appinit to Profile, this will allow appinit upgrades
 #                    via CSI when NMT has no correctly working internet connection.
-#					Check if version length is 15 or less character
-#					add .no_all.nmj to Apps folder so it will not be indexed
+#                   Check if version length is 15 or less character
+#                   add .no_all.nmj to Apps folder so it will not be indexed
 #
 #   Version 1.14
 #       jhmiller: Added support for SD Card and improved device detection
@@ -120,6 +120,9 @@
 #   Version 1.17
 #       jhmiller: Added VTEN support.
 #
+#   Version 1.18
+#           JrCs: Update functions to "update" init_mnt script and crontab file.
+#                 Fix invalid tests in init_nmt script.
 #
 #-------------------------------------------------------------
 #   Legal: published under GPL v3
@@ -138,7 +141,7 @@ APPS_MINIMAL_APPINFO_VERSION="1"
 APPINIT_NAME="Application Initializer"
 APPINIT_FILENAME="appinit.cgi"
 APPINIT_PROFILE="$APPS_FOLDER/AppInit"
-APPINIT_VERSION="1.17"
+APPINIT_VERSION="1.18"
 APPINIT_VERSION_URL="http://54.75.246.28/~csi/csi-downloads/appinit_version"
 APPINIT_UPGRADE_URL="http://54.75.246.28/~csi/csi-downloads/appinit.cgi"
 APPINIT_AUTOSTART_STATE="/tmp/appinit_state"
@@ -226,24 +229,18 @@ appinit_autostart_remove()
 
 appinit_bootstart_add()
 {
-    if [ -z "`cat "$STARTSCRIP_LOCATION" | grep "$APPINIT_FILENAME"`" ]; then
+    if ! grep -q "$APPINIT_PROFILE/$APPINIT_FILENAME" "$STARTSCRIP_LOCATION"; then
         echo -n "Configuring system to start all applications on boot: "
-        TEMP="`cat "$STARTSCRIP_LOCATION"`"
-        
-        TEMP="`string_replace "$TEMP" "case \\\"\\$1\\\" in" "$APPINIT_PROFILE/$APPINIT_FILENAME \\\"\\$1\\\"
-case \\\"\\$1\\\" in"`"
-        
-        echo "$TEMP" > "$STARTSCRIP_LOCATION"
+        sed -i "\!^case .*in!i $APPINIT_PROFILE/$APPINIT_FILENAME \"\$1\"" "$STARTSCRIP_LOCATION"
         echo "Done"
     fi
 }
 
 appinit_bootstart_remove()
 {
-    if [ -n "`cat "$STARTSCRIP_LOCATION" | grep "$APPINIT_FILENAME"`" ]; then
+    if grep -q "$APPINIT_PROFILE/$APPINIT_FILENAME" "$STARTSCRIP_LOCATION"; then
         echo -n "Configuring system not to start all applications on boot: "
-        TEMP="`cat "$STARTSCRIP_LOCATION" | grep -v "$APPINIT_FILENAME"`"
-        echo "$TEMP" > "$STARTSCRIP_LOCATION"
+        sed -i "\!^$APPINIT_PROFILE/$APPINIT_FILENAME!d" "$STARTSCRIP_LOCATION"
         echo "Done"
     fi
 }
@@ -314,6 +311,12 @@ appinit_profile_cronupdate()
     crontab -l > "$CRONTAB_LOCATION" 2>/dev/null
 }
 
+appinit_fix_init_nmt()
+{
+	# Fix invalid tests
+	sed -i -e 's!test -z $CHECKMODE!test -z "$CHECKMODE"!g' "$STARTSCRIP_LOCATION"
+}
+
 appinit_webserver_enable()
 {
     rm -f "$APPINIT_WEBSERVER_DISABLED"
@@ -363,9 +366,8 @@ appinit_webserver_disable()
 
 app_crontab_remove()
 {
-    if [ -n "`cat "$CRONTAB_LOCATION" | grep "#APPINIT_${name}#"`" ]; then
-        TEMP="`cat "$CRONTAB_LOCATION" | grep -v "#APPINIT_${1}#" 2>/dev/null`"
-        echo "$TEMP" > "$CRONTAB_LOCATION"
+    if grep -q "#APPINIT_${name}#" "$CRONTAB_LOCATION"; then
+        sed -i "\!#APPINIT_${name}!d" "$CRONTAB_LOCATION"
         CRONTAB_RELOAD="1"
     fi
 }
@@ -373,11 +375,9 @@ app_crontab_remove()
 
 app_crontab_add()
 {
-    if [ -n "$crontab" ] && [ -z "`cat "$CRONTAB_LOCATION" | grep "#APPINIT_${name}#"`" ]; then
-        TEMP="`cat "$CRONTAB_LOCATION"`"
-        TEMP="`string_replace "$TEMP" "#bt" "$crontab #APPINIT_${name}#
-#bt"`"
-        echo "$TEMP" > "$CRONTAB_LOCATION"
+    if test -n "$crontab" && ! grep -q "#APPINIT_${name}#" "$CRONTAB_LOCATION"; then
+        sed -i "\!#APPINIT_${name}!d" "$CRONTAB_LOCATION"
+        echo "$crontab #APPINIT_${name}#" >> "$CRONTAB_LOCATION"
         CRONTAB_RELOAD="1"
     fi
 }
@@ -852,7 +852,8 @@ appinit_prepare()
     appinit_auto_upgrade "$1" "$2"
     appinit_profile_create
     appinit_profile_cronupdate
-    
+    appinit_fix_init_nmt
+
     if [ -f "$APPINIT_WEBSERVER_DISABLED" ]; then
         appinit_webserver_disable
     else
