@@ -1,9 +1,9 @@
-<h1>Version 2.7.5.0</h1>
-Released on: Nov 7th, 2014
+<h1>Version 2.7.5.5</h1>
+Released on: May 17th, 2015
 
-Added support for A410 Popcorn model.
+Added support for VTEN Popcorn model.
 
 <h3>Changelog</h3>
-- Added support for A410 Popcorn model
+- Added support for VTEN Popcorn model
 
 Use http://www.networkedmediatank.com/showthread.php?tid=64695 to report any remaining issues.
