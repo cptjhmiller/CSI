@@ -22,7 +22,7 @@ if [ -e "/nmt/apps" ]; then
 	STARTSCRIP_LOCATION="$NMTAPPS_LOCATION/etc/init_nmt"
 	configid=$(genxenv2 l /tmp/lrro.xenv 2>/dev/null | grep -e " lrro.configid" | sed -e's/.*lrro.configid\s*//' | sed 's/\ //g'| sed 's/0x//g')
 	configid=$configid[@]:0:4
-	if [ "$configid" = "8003" ]; then
+	if [ "$configid" = "87578003[@]:0:4" ]; then
 		echo "Popcorn Hour VTEN"
 	elif [ "$configid" = "8911" ]; then
 		echo "Popcorn Hour A400/410"
