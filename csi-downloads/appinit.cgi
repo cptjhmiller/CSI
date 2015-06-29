@@ -124,6 +124,9 @@
 #           JrCs: Update functions to "update" init_mnt script and crontab file.
 #                 Fix invalid tests in init_nmt script.
 #
+#   Version 1.19
+#       jhmiller: Fix VTEN transmission install.
+#
 #-------------------------------------------------------------
 #   Legal: published under GPL v3
 #   http://www.gnu.org/licenses/gpl-3.0.txt
@@ -141,7 +144,7 @@ APPS_MINIMAL_APPINFO_VERSION="1"
 APPINIT_NAME="Application Initializer"
 APPINIT_FILENAME="appinit.cgi"
 APPINIT_PROFILE="$APPS_FOLDER/AppInit"
-APPINIT_VERSION="1.18"
+APPINIT_VERSION="1.19"
 APPINIT_VERSION_URL="http://54.75.246.28/~csi/csi-downloads/appinit_version"
 APPINIT_UPGRADE_URL="http://54.75.246.28/~csi/csi-downloads/appinit.cgi"
 APPINIT_AUTOSTART_STATE="/tmp/appinit_state"
@@ -150,27 +153,26 @@ CRONTAB_RELOAD="0"
 APPINIT_APPS_AUTOSTART="0"
 APPINIT_APPS_BOOTSTART="1"
 TAR="/bin/tar"
+CHIPSET="NULL"
 
 #SET A400, 200/300 or A/B variables
 echo -n "Found hardware type: "
-if [ -e "/nmt/apps" ]; then
-	NMTAPPS_LOCATION="/nmt/apps"
-	STARTSCRIP_LOCATION="$NMTAPPS_LOCATION/etc/init_nmt"
-	configid=$(genxenv2 l /tmp/lrro.xenv 2>/dev/null | grep -e " lrro.configid" | sed -e's/.*lrro.configid\s*//' | sed 's/\ //g'| sed 's/0x//g')
-	configid=$configid[@]:0:4
-	if [ "$configid" = "87578003[@]:0:4" ]; then
-		echo "Popcorn Hour VTEN"
-	elif [ "$configid" = "8911" ]; then
-		echo "Popcorn Hour A400"
-	elif [ "$configid" = "8647" ]; then
-		echo "Popcorn Hour A/C300"
-	else
-		echo "Popcorn Hour A/C200"
-	fi
+if [ -d /opt/gaya ]; then
+    echo "Popcorn Hour A1xx/B110"
+    NMTAPPS_LOCATION="/mnt/syb8634"
+    STARTSCRIP_LOCATION="$NMTAPPS_LOCATION/etc/ftpserver.sh"
 else
-	echo "Popcorn Hour A1xx/B110"
-	NMTAPPS_LOCATION="/mnt/syb8634"
-	STARTSCRIP_LOCATION="$NMTAPPS_LOCATION/etc/ftpserver.sh"
+    NMTAPPS_LOCATION="/nmt/apps"
+    STARTSCRIP_LOCATION="$NMTAPPS_LOCATION/etc/init_nmt"
+    CHIPSET=`/opt/syb/sigma/bin/gbus_read_uint32 0x0002fee8 2>&-`
+    if [ $CHIPSET = "0x00008911" ];then
+        echo "Popcorn Hour A400/410"
+    elif [ $CHIPSET = "0x00008647" ];then
+        echo "Popcorn Hour A/C300"
+    elif [ $CHIPSET = "0x00008643" ];then
+        echo "Popcorn Hour A/C200"
+    elif [ $CHIPSET = "0x87578003" ];then
+        echo "Popcorn Hour VTEN"
 fi
 
 SCRIPTALIAS_LOCATION="$NMTAPPS_LOCATION/server"
@@ -754,7 +756,9 @@ application_start()
     if [ "$?" == "0" ]; then
         [[ $(tolower $fix_permissions) == y* ]] && app_fixpermissions "$path"
         app_autoinstall
-        app_websites_add
+        if [ $CHIPSET != "0x87578003" ];then
+            app_websites_add
+        fi
         app_crontab_add
         app_daemon_execute start
         app_startstate_add
@@ -769,7 +773,9 @@ application_stop()
     echo -n "Stopping $name: "
     app_startstate_isstarted
     if [ "$?" == "1" ]; then
-        app_websites_remove
+        if [ $CHIPSET != "0x87578003" ];then
+            app_websites_remove
+        fi
         app_crontab_remove "$name"
         app_daemon_execute stop
         app_startstate_remove
@@ -784,9 +790,13 @@ application_rescan()
     echo -n "Rescanning $name: "
     app_startstate_isstarted
     if [ "$?" == "1" ]; then
-        app_websites_remove
+        if [ $CHIPSET != "0x87578003" ];then
+            app_websites_remove
+        fi
         app_crontab_remove "$name"
-        app_websites_add
+        if [ $CHIPSET != "0x87578003" ];then
+            app_websites_add
+        fi
         app_crontab_add
         echo "Done"
     else
@@ -799,7 +809,9 @@ application_uninstall()
     echo -n "Uninstalling $name: "
 
     app_crontab_remove "$name"
-    app_websites_remove
+    if [ $CHIPSET != "0x87578003" ];then
+        app_websites_remove
+    fi
     app_startstate_isstarted
     if [ "$?" == "1" ]; then
         app_daemon_execute stop

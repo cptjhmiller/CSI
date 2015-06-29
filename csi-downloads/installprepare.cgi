@@ -14,27 +14,26 @@ fi
 STARTER="/share/start_app.sh"
 MARKER="#M_A_R_K_E_R_do_not_remove_me"
 WAITIMAGES="/share/Photo/_waitimages_"
+CHIPSET="NULL"
 
 #SET A400, 200/300 or A/B variables
 echo -n "Found hardware type: "
-if [ -e "/nmt/apps" ]; then
-	NMTAPPS_LOCATION="/nmt/apps"
-	STARTSCRIP_LOCATION="$NMTAPPS_LOCATION/etc/init_nmt"
-	configid=$(genxenv2 l /tmp/lrro.xenv 2>/dev/null | grep -e " lrro.configid" | sed -e's/.*lrro.configid\s*//' | sed 's/\ //g'| sed 's/0x//g')
-	configid=$configid[@]:0:4
-	if [ "$configid" = "87578003[@]:0:4" ]; then
-		echo "Popcorn Hour VTEN"
-	elif [ "$configid" = "8911" ]; then
-		echo "Popcorn Hour A400/410"
-	elif [ "$configid" = "8647" ]; then
-		echo "Popcorn Hour A/C300"
-	else
-		echo "Popcorn Hour A/C200"
-	fi
+if [ -d /opt/gaya ]; then
+    echo "Popcorn Hour A1xx/B110"
+    NMTAPPS_LOCATION="/mnt/syb8634"
+    STARTSCRIP_LOCATION="$NMTAPPS_LOCATION/etc/ftpserver.sh"
 else
-	echo "Popcorn Hour A1xx/B110"
-	NMTAPPS_LOCATION="/mnt/syb8634"
-	STARTSCRIP_LOCATION="$NMTAPPS_LOCATION/etc/ftpserver.sh"
+    NMTAPPS_LOCATION="/nmt/apps"
+    STARTSCRIP_LOCATION="$NMTAPPS_LOCATION/etc/init_nmt"
+    CHIPSET=`/opt/syb/sigma/bin/gbus_read_uint32 0x0002fee8 2>&-`
+    if [ $CHIPSET = "0x00008911" ];then
+        echo "Popcorn Hour A400/410"
+    elif [ $CHIPSET = "0x00008647" ];then
+        echo "Popcorn Hour A/C300"
+    elif [ $CHIPSET = "0x00008643" ];then
+        echo "Popcorn Hour A/C200"
+    elif [ $CHIPSET = "0x87578003" ];then
+        echo "Popcorn Hour VTEN"
 fi
 
 IFS='&'
@@ -215,7 +214,9 @@ rollout_appinit()
 
 
 compile_script "$autostart_add"
-add_webservice "$webservice_name" "$webservice_url"
+if [ $CHIPSET != "0x87578003" ];then
+    add_webservice "$webservice_name" "$webservice_url"
+fi
 hookup_script
 eval $(script_copy_waitimages)
 eval $(script_b110_compatibility)
