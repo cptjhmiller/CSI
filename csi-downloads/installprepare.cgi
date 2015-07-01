@@ -32,8 +32,9 @@ else
         echo "Popcorn Hour A/C300"
     elif [ $CHIPSET = "0x00008643" ];then
         echo "Popcorn Hour A/C200"
-    elif [ $CHIPSET = "0x87578003" ];then
+    elif [ $CHIPSET = "0x00008757" ];then
         echo "Popcorn Hour VTEN"
+    fi
 fi
 
 IFS='&'
@@ -214,7 +215,7 @@ rollout_appinit()
 
 
 compile_script "$autostart_add"
-if [ $CHIPSET != "0x87578003" ];then
+if [ $CHIPSET != "0x00008757" ];then
     add_webservice "$webservice_name" "$webservice_url"
 fi
 hookup_script

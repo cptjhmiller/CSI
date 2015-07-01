@@ -171,8 +171,9 @@ else
         echo "Popcorn Hour A/C300"
     elif [ $CHIPSET = "0x00008643" ];then
         echo "Popcorn Hour A/C200"
-    elif [ $CHIPSET = "0x87578003" ];then
+    elif [ $CHIPSET = "0x00008757" ];then
         echo "Popcorn Hour VTEN"
+    fi
 fi
 
 SCRIPTALIAS_LOCATION="$NMTAPPS_LOCATION/server"
@@ -756,7 +757,7 @@ application_start()
     if [ "$?" == "0" ]; then
         [[ $(tolower $fix_permissions) == y* ]] && app_fixpermissions "$path"
         app_autoinstall
-        if [ $CHIPSET != "0x87578003" ];then
+        if [ $CHIPSET != "0x00008757" ];then
             app_websites_add
         fi
         app_crontab_add
@@ -773,7 +774,7 @@ application_stop()
     echo -n "Stopping $name: "
     app_startstate_isstarted
     if [ "$?" == "1" ]; then
-        if [ $CHIPSET != "0x87578003" ];then
+        if [ $CHIPSET != "0x00008757" ];then
             app_websites_remove
         fi
         app_crontab_remove "$name"
@@ -790,11 +791,11 @@ application_rescan()
     echo -n "Rescanning $name: "
     app_startstate_isstarted
     if [ "$?" == "1" ]; then
-        if [ $CHIPSET != "0x87578003" ];then
+        if [ $CHIPSET != "0x00008757" ];then
             app_websites_remove
         fi
         app_crontab_remove "$name"
-        if [ $CHIPSET != "0x87578003" ];then
+        if [ $CHIPSET != "0x00008757" ];then
             app_websites_add
         fi
         app_crontab_add
@@ -809,7 +810,7 @@ application_uninstall()
     echo -n "Uninstalling $name: "
 
     app_crontab_remove "$name"
-    if [ $CHIPSET != "0x87578003" ];then
+    if [ $CHIPSET != "0x00008757" ];then
         app_websites_remove
     fi
     app_startstate_isstarted
