@@ -387,13 +387,9 @@ app_crontab_add()
 
 app_websites_add()
 {
-    echo "1 cp $webui_path $APPINIT_PROFILE/websites/${name}_web"
     if [ -d "$webui_path" ] && [ ! -d "$APPINIT_PROFILE/websites/${name}_web" ]; then
-        echo "2 cp $webui_path $APPINIT_PROFILE/websites/${name}_web"
         if [ $CHIPSET = "0x00008757" ];then
-		    #ln -s "$webui_path" "$APPINIT_PROFILE/websites/${name}_web"
-            echo "cp $webui_path $APPINIT_PROFILE/websites/${name}_web"
-		    cp "$webui_path" "$APPINIT_PROFILE/websites/${name}_web"
+		    cp -Ra "$webui_path" "$APPINIT_PROFILE/websites/${name}_web"
         else
             ln -s "$webui_path" "$APPINIT_PROFILE/websites/${name}_web"
         fi
