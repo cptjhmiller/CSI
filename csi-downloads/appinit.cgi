@@ -163,7 +163,7 @@ if [ -d /opt/gaya ]; then
     STARTSCRIP_LOCATION="$NMTAPPS_LOCATION/etc/ftpserver.sh"
 else
     NMTAPPS_LOCATION="/nmt/apps"
-    STARTSCRIP_LOCATION="$NMTAPPS_LOCATION/etc/init_nmt"
+    STARTSCRIP_LOCATION="/nmt/apps/etc/init_nmt"
     CHIPSET=`/opt/syb/sigma/bin/gbus_read_uint32 0x0002fee8 2>&-`
     if [ $CHIPSET = "0x00008911" ];then
         echo "Popcorn Hour A400/410"
@@ -176,8 +176,8 @@ else
     fi
 fi
 
-SCRIPTALIAS_LOCATION="$NMTAPPS_LOCATION/server"
-HTTPDCONF_LOCATION="$NMTAPPS_LOCATION/server/php5server"
+SCRIPTALIAS_LOCATION="/nmt/apps/server"
+HTTPDCONF_LOCATION="/nmt/apps/server/php5server"
 CRONTAB_LOCATION="$NMTAPPS_LOCATION/etc/root.cron"
 UNRAR="$NMTAPPS_LOCATION/bin/unrar"
 
@@ -387,8 +387,16 @@ app_crontab_add()
 
 app_websites_add()
 {
+    echo "1 cp $webui_path $APPINIT_PROFILE/websites/${name}_web"
     if [ -d "$webui_path" ] && [ ! -d "$APPINIT_PROFILE/websites/${name}_web" ]; then
-        ln -s "$webui_path" "$APPINIT_PROFILE/websites/${name}_web"
+        echo "2 cp $webui_path $APPINIT_PROFILE/websites/${name}_web"
+        if [ $CHIPSET = "0x00008757" ];then
+		    #ln -s "$webui_path" "$APPINIT_PROFILE/websites/${name}_web"
+            echo "cp $webui_path $APPINIT_PROFILE/websites/${name}_web"
+		    cp "$webui_path" "$APPINIT_PROFILE/websites/${name}_web"
+        else
+            ln -s "$webui_path" "$APPINIT_PROFILE/websites/${name}_web"
+        fi
     fi
     
     if [ -d "$gayaui_path" ] && [ ! -d "$APPINIT_PROFILE/websites/${name}_gaya" ]; then
@@ -757,9 +765,7 @@ application_start()
     if [ "$?" == "0" ]; then
         [[ $(tolower $fix_permissions) == y* ]] && app_fixpermissions "$path"
         app_autoinstall
-        if [ $CHIPSET != "0x00008757" ];then
-            app_websites_add
-        fi
+        app_websites_add
         app_crontab_add
         app_daemon_execute start
         app_startstate_add
@@ -774,9 +780,7 @@ application_stop()
     echo -n "Stopping $name: "
     app_startstate_isstarted
     if [ "$?" == "1" ]; then
-        if [ $CHIPSET != "0x00008757" ];then
-            app_websites_remove
-        fi
+        app_websites_remove
         app_crontab_remove "$name"
         app_daemon_execute stop
         app_startstate_remove
@@ -791,13 +795,9 @@ application_rescan()
     echo -n "Rescanning $name: "
     app_startstate_isstarted
     if [ "$?" == "1" ]; then
-        if [ $CHIPSET != "0x00008757" ];then
-            app_websites_remove
-        fi
+        app_websites_remove
         app_crontab_remove "$name"
-        if [ $CHIPSET != "0x00008757" ];then
-            app_websites_add
-        fi
+        app_websites_add
         app_crontab_add
         echo "Done"
     else
@@ -810,9 +810,7 @@ application_uninstall()
     echo -n "Uninstalling $name: "
 
     app_crontab_remove "$name"
-    if [ $CHIPSET != "0x00008757" ];then
-        app_websites_remove
-    fi
+    app_websites_remove
     app_startstate_isstarted
     if [ "$?" == "1" ]; then
         app_daemon_execute stop
