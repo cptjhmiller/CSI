@@ -127,6 +127,9 @@
 #   Version 1.19
 #       jhmiller: Fix VTEN transmission install.
 #
+#   Version 1.20
+#       jhmiller: Fix PCH A1xx script issues.
+#
 #-------------------------------------------------------------
 #   Legal: published under GPL v3
 #   http://www.gnu.org/licenses/gpl-3.0.txt
@@ -144,7 +147,7 @@ APPS_MINIMAL_APPINFO_VERSION="1"
 APPINIT_NAME="Application Initializer"
 APPINIT_FILENAME="appinit.cgi"
 APPINIT_PROFILE="$APPS_FOLDER/AppInit"
-APPINIT_VERSION="1.19"
+APPINIT_VERSION="1.20"
 APPINIT_VERSION_URL="http://54.75.246.28/~csi/csi-downloads/appinit_version"
 APPINIT_UPGRADE_URL="http://54.75.246.28/~csi/csi-downloads/appinit.cgi"
 APPINIT_AUTOSTART_STATE="/tmp/appinit_state"
@@ -176,8 +179,8 @@ else
     fi
 fi
 
-SCRIPTALIAS_LOCATION="/nmt/apps/server"
-HTTPDCONF_LOCATION="/nmt/apps/server/php5server"
+SCRIPTALIAS_LOCATION="$NMTAPPS_LOCATION/server"
+HTTPDCONF_LOCATION="$NMTAPPS_LOCATION/server/php5server"
 CRONTAB_LOCATION="$NMTAPPS_LOCATION/etc/root.cron"
 UNRAR="$NMTAPPS_LOCATION/bin/unrar"
 
