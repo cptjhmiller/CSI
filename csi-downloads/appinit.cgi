@@ -128,7 +128,10 @@
 #       jhmiller: Fix VTEN transmission install.
 #
 #   Version 1.20
-#       jhmiller: Fix PCH A1xx script issues.
+#       vaidyasr: Fix PCH A1xx script issues.
+#
+#   Version 1.21
+#       vaidyasr: Check the filesystem.
 #
 #-------------------------------------------------------------
 #   Legal: published under GPL v3
@@ -147,7 +150,7 @@ APPS_MINIMAL_APPINFO_VERSION="1"
 APPINIT_NAME="Application Initializer"
 APPINIT_FILENAME="appinit.cgi"
 APPINIT_PROFILE="$APPS_FOLDER/AppInit"
-APPINIT_VERSION="1.20"
+APPINIT_VERSION="1.21"
 APPINIT_VERSION_URL="http://54.75.246.28/~csi/csi-downloads/appinit_version"
 APPINIT_UPGRADE_URL="http://54.75.246.28/~csi/csi-downloads/appinit.cgi"
 APPINIT_AUTOSTART_STATE="/tmp/appinit_state"
@@ -157,6 +160,8 @@ APPINIT_APPS_AUTOSTART="0"
 APPINIT_APPS_BOOTSTART="1"
 TAR="/bin/tar"
 CHIPSET="NULL"
+FILE_SYSTEM_PATH=`/bin/busybox df $APPINIT_PROFILE|/bin/busybox tail -1|/bin/busybox cut -d' ' -f1`
+FILE_SYSTEM=`/bin/busybox mount |/bin/busybox grep $FILE_SYSTEM_PATH|/bin/busybox cut -d' ' -f5`
 
 #SET A400, 200/300 or A/B variables
 echo -n "Found hardware type: "
@@ -178,6 +183,7 @@ else
         echo "Popcorn Hour VTEN"
     fi
 fi
+echo -n "File system: $FILE_SYSTEM"
 
 SCRIPTALIAS_LOCATION="$NMTAPPS_LOCATION/server"
 HTTPDCONF_LOCATION="$NMTAPPS_LOCATION/server/php5server"
@@ -390,12 +396,16 @@ app_crontab_add()
 
 app_websites_add()
 {
-    if [ -d "$webui_path" ] && [ ! -d "$APPINIT_PROFILE/websites/${name}_web" ]; then
-        if [ $CHIPSET = "0x00008757" ];then
-		    cp -Ra "$webui_path" "$APPINIT_PROFILE/websites/${name}_web"
-        else
-            ln -s "$webui_path" "$APPINIT_PROFILE/websites/${name}_web"
-        fi
+     if [ -d "$webui_path" ] && [ ! -d "$APPINIT_PROFILE/websites/${name}_web" ]; then
+         if [ $CHIPSET = "0x00008757" ];then
+            if [ $FILE_SYSTEM = "ext3" -o $FILE_SYSTEM = "ext2" ]; then
+              ln -s "$webui_path" "$APPINIT_PROFILE/websites/${name}_web"
+            else
+              cp -Ra "$webui_path" "$APPINIT_PROFILE/websites/${name}_web"
+            fi
+         else
+             ln -s "$webui_path" "$APPINIT_PROFILE/websites/${name}_web"
+         fi
     fi
     
     if [ -d "$gayaui_path" ] && [ ! -d "$APPINIT_PROFILE/websites/${name}_gaya" ]; then
