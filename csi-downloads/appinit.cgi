@@ -921,42 +921,42 @@ process()
             
                 #In case of All applications do not process disabled applications
                 if [ "$enabled" == "1" ] || [ -n "$2" ] || [ "$1" == "info" ]; then
-                    
+
                     ProcessedApplication="1"
                     cd "$path"
-                   
+
                     case "$1" in
                         start)
                         application_start
                         ;;
-                        
+
                         stop)
                         application_stop
                         ;;
-                        
+
                         restart)
                         application_stop
                         sleep 1
                         application_start
                         ;;
-                        
+
                         rescan)
                         application_rescan
                         ;;
-                        
+
                         uninstall)
                         application_uninstall
                         rm -Rf "$path"
                         ;;
-                        
+
                         enable)
                         application_enable
                         ;;
-                        
+
                         disable)
                         application_disable
                         ;;
-                        
+
                         info)
                         application_info
                         ;;
@@ -1003,7 +1003,7 @@ parameter="`url_decode "$2"`"
 case "$command" in
     install|uninstall|start|stop|restart|info|rescan|enable|disable|webserver_enable|webserver_disable)
     ;;
-    
+
     *)
     echo
     echo "Usage: "
@@ -1044,15 +1044,15 @@ if [ "$process" == "1" ]; then
          install)
          application_install "$parameter"
          ;;
-         
+
          webserver_enable)
          appinit_webserver_enable
          ;;
-         
+
          webserver_disable)
          appinit_webserver_disable
          ;;
-         
+
          *)
          process "$command" "$parameter"
          ;;
